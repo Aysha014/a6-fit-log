@@ -60,6 +60,3 @@ FitLog is fully responsive and designed to work across:
 
 Today's Plan and Saved workouts are stored in the browser's localStorage so that the data remains available after refreshing the page.
 
-## 👩‍💻 Author
-
-Developed as part of the Programming Hero B14 Assignment 6.
