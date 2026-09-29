@@ -1,14 +1,17 @@
-import Banner from '@/components/homepage/Banner';
-import Library from '@/components/homepage/Library';
-import React from 'react';
+import { Suspense } from "react";
 
-const page = () => {
+import Banner from "@/components/homepage/Banner";
+import Library from "@/components/homepage/Library";
+import LibraryLoading from "@/components/homepage/LibraryLoading";
+
+export default function Home() {
   return (
-    <div>
+    <>
       <Banner />
-      <Library />
-    </div>
-  );
-};
 
-export default page;
+      <Suspense fallback={<LibraryLoading />}>
+        <Library />
+      </Suspense>
+    </>
+  );
+}
