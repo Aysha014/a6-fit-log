@@ -1,39 +1,31 @@
 "use client";
 
-import {
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
 import {
   FiClock,
+  FiSearch,
   FiStar,
   FiChevronDown,
 } from "react-icons/fi";
 
 import { FaFire } from "react-icons/fa";
 
-import { Workout } from "@/types/workout";
+import type { Workout } from "@/types/workout";
 
-type SortOption =
-  | "duration"
-  | "calories"
-  | "rating";
+type SortOption = "duration" | "calories" | "rating";
 
 export default function Library() {
-  const [workouts, setWorkouts] = useState<
-    Workout[]
-  >([]);
-
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [searchText, setSearchText] = useState("");
   const [sortBy, setSortBy] =
     useState<SortOption>("duration");
 
+  // Fetch workouts
   useEffect(() => {
     const fetchWorkouts = async () => {
       try {
@@ -44,9 +36,7 @@ export default function Library() {
         );
 
         if (!response.ok) {
-          throw new Error(
-            "Failed to fetch workouts"
-          );
+          throw new Error("Failed to fetch workouts");
         }
 
         const data: Workout[] =
@@ -63,27 +53,47 @@ export default function Library() {
     fetchWorkouts();
   }, []);
 
-  const sortedWorkouts = useMemo(() => {
-    const copied = [...workouts];
+  // Search + Sort
+  const displayedWorkouts = useMemo(() => {
+    const search = searchText
+      .trim()
+      .toLowerCase();
 
-    if (sortBy === "duration") {
-      return copied.sort(
-        (a, b) => a.duration - b.duration
-      );
-    }
+    const filteredWorkouts = workouts.filter(
+      (workout) => {
+        const matchesName = workout.name
+          .toLowerCase()
+          .includes(search);
 
-    if (sortBy === "calories") {
-      return copied.sort(
-        (a, b) =>
-          a.caloriesBurned -
-          b.caloriesBurned
-      );
-    }
+        const matchesTag =
+          workout.muscleGroups.some((group) =>
+            group
+              .toLowerCase()
+              .includes(search)
+          );
 
-    return copied.sort(
-      (a, b) => b.rating - a.rating
+        return matchesName || matchesTag;
+      }
     );
-  }, [workouts, sortBy]);
+
+    return [...filteredWorkouts].sort(
+      (a, b) => {
+        if (sortBy === "calories") {
+          return (
+            a.caloriesBurned -
+            b.caloriesBurned
+          );
+        }
+
+        if (sortBy === "rating") {
+          return b.rating - a.rating;
+        }
+
+        // Default: Duration
+        return a.duration - b.duration;
+      }
+    );
+  }, [workouts, searchText, sortBy]);
 
   return (
     <section
@@ -92,56 +102,75 @@ export default function Library() {
     >
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
 
-        {/* Heading + Sort */}
-        <div className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        {/* Header */}
+        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
 
+          {/* Left side */}
           <div>
             <h2 className="text-2xl font-black uppercase tracking-tight md:text-3xl">
               THE LIBRARY
             </h2>
 
             <p className="mt-2 text-xs text-[#8b8d91]">
-              Twelve lifts covering every major
-              muscle group.
+              Twelve lifts covering every major muscle group.
             </p>
           </div>
 
-          {/* Sort */}
-          <div className="relative">
-            <label
-              htmlFor="sort"
-              className="mr-2 text-xs text-gray-400"
-            >
-              Sort By
-            </label>
+          {/* Search + Sort */}
+          <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto lg:items-center">
 
-            <select
-              id="sort"
-              value={sortBy}
-              onChange={(event) =>
-                setSortBy(
-                  event.target
-                    .value as SortOption
-                )
-              }
-              className="appearance-none rounded-md border border-white/10 bg-[#181a1f] py-2 pl-4 pr-9 text-xs text-white outline-none"
-            >
-              <option value="duration">
-                Duration
-              </option>
+            {/* Search */}
+            <div className="relative w-full sm:w-72">
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500" />
 
-              <option value="calories">
-                Calories
-              </option>
+              <input
+                type="text"
+                value={searchText}
+                onChange={(event) =>
+                  setSearchText(
+                    event.target.value
+                  )
+                }
+                placeholder="Search workouts..."
+                className="w-full rounded-md border border-white/10 bg-[#181a1f] py-2.5 pl-10 pr-4 text-sm text-white outline-none placeholder:text-gray-500 focus:border-[#ccff00]"
+              />
+            </div>
 
-              <option value="rating">
-                Rating
-              </option>
-            </select>
+            {/* Sort */}
+            <div className="flex items-center gap-2">
+              <span className="whitespace-nowrap text-xs text-gray-400">
+                Sort By
+              </span>
 
-            <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 mt-2px -translate-y-1/2 text-xs text-gray-400" />
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(event) =>
+                    setSortBy(
+                      event.target
+                        .value as SortOption
+                    )
+                  }
+                  className="appearance-none rounded-md border border-white/10 bg-[#181a1f] py-2.5 pl-4 pr-9 text-sm text-white outline-none focus:border-[#ccff00]"
+                >
+                  <option value="duration">
+                    Duration
+                  </option>
+
+                  <option value="calories">
+                    Calories
+                  </option>
+
+                  <option value="rating">
+                    Rating
+                  </option>
+                </select>
+
+                <FiChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400" />
+              </div>
+            </div>
+
           </div>
-
         </div>
 
         {/* Loading */}
@@ -151,87 +180,121 @@ export default function Library() {
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-white/20 border-t-[#ccff00]" />
 
             <p className="text-sm text-gray-400">
-              Loading workouts…
+              Loading workouts...
             </p>
 
           </div>
         )}
 
-        {/* Grid */}
-        {!loading && (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {/* No results */}
+        {!loading &&
+          displayedWorkouts.length === 0 && (
+            <div className="flex min-h-64 flex-col items-center justify-center text-center">
 
-            {sortedWorkouts.map(
-              (workout) => (
-                <Link
-                  key={workout.id}
-                  href={`/workout/${workout.id}`}
-                  className="group overflow-hidden rounded-lg border border-white/5 bg-[#181a1f] transition hover:-translate-y-1 hover:border-[#ccff00]/40"
-                >
+              <h3 className="text-xl font-black uppercase">
+                No workouts found
+              </h3>
 
-                  {/* Image */}
-                  <div className="h-56 w-full overflow-hidden">
-                    <Image
-                      src={workout.image}
-                      alt={workout.name}
-                      width={600}
-                      height={400}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                  </div>
+              <p className="mt-2 text-sm text-gray-400">
+                Try another workout name or muscle group.
+              </p>
 
-                  {/* Body */}
-                  <div className="px-4 pb-4 pt-4">
+            </div>
+          )}
 
-                    {/* Tags */}
-                    <div className="mb-3 flex flex-wrap gap-2">
-                      {workout.muscleGroups.map(
-                        (group) => (
-                          <span
-                            key={group}
-                            className="rounded-full bg-[#ccff00] px-2.5 py-1 text-[9px] font-black uppercase text-black"
-                          >
-                            {group}
+        {/* Workout Grid */}
+        {!loading &&
+          displayedWorkouts.length > 0 && (
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+
+              {displayedWorkouts.map(
+                (workout) => (
+                  <Link
+                    key={workout.id}
+                    href={`/workout/${workout.id}`}
+                    className="group overflow-hidden rounded-lg border border-white/5 bg-[#181a1f] transition hover:-translate-y-1 hover:border-[#ccff00]/40"
+                  >
+
+                    {/* Image */}
+                    <div className="h-56 w-full overflow-hidden">
+                      <Image
+                        src={workout.image}
+                        alt={workout.name}
+                        width={600}
+                        height={400}
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="px-4 pb-4 pt-4">
+
+                      {/* Muscle group tags */}
+                      <div className="mb-3 flex flex-wrap gap-2">
+                        {workout.muscleGroups.map(
+                          (group) => (
+                            <span
+                              key={group}
+                              className="rounded-full bg-[#ccff00] px-2.5 py-1 text-[9px] font-black uppercase text-black"
+                            >
+                              {group}
+                            </span>
+                          )
+                        )}
+                      </div>
+
+                      {/* Workout name */}
+                      <h3 className="text-sm font-black uppercase tracking-wide text-white">
+                        {workout.name}
+                      </h3>
+
+                      {/* Equipment */}
+                      <p className="mt-1 text-[11px] text-gray-400">
+                        {workout.equipment}
+                      </p>
+
+                      {/* Divider */}
+                      <div className="my-4 h-px bg-white/10" />
+
+                      {/* Stats */}
+                      <div className="flex flex-wrap items-center gap-5 text-[10px] text-gray-400">
+
+                        {/* Duration */}
+                        <div className="flex items-center gap-1.5">
+                          <FiClock />
+                          <span>
+                            {workout.duration} min
                           </span>
-                        )
-                      )}
-                    </div>
+                        </div>
 
-                    <h3 className="text-sm font-black uppercase tracking-wide">
-                      {workout.name}
-                    </h3>
+                        {/* Calories */}
+                        <div className="flex items-center gap-1.5">
+                          <FaFire />
+                          <span>
+                            {
+                              workout.caloriesBurned
+                            }{" "}
+                            kcal
+                          </span>
+                        </div>
 
-                    <p className="mt-1 text-[11px] text-gray-400">
-                      {workout.equipment}
-                    </p>
+                        {/* Rating */}
+                        <div className="flex items-center gap-1.5">
+                          <FiStar />
+                          <span>
+                            {workout.rating}
+                          </span>
+                        </div>
 
-                    <div className="my-4 h-px bg-white/10" />
-
-                    <div className="flex flex-wrap items-center gap-5 text-[10px] text-gray-400">
-
-                      <div className="flex items-center gap-1.5">
-                        <FiClock />
-                        {workout.duration} min
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <FaFire />
-                        {workout.caloriesBurned} kcal
-                      </div>
-
-                      <div className="flex items-center gap-1.5">
-                        <FiStar />
-                        {workout.rating}
                       </div>
 
                     </div>
-                  </div>
-                </Link>
-              )
-            )}
+                  </Link>
+                )
+              )}
 
-          </div>
-        )}
+            </div>
+          )}
 
       </div>
     </section>
