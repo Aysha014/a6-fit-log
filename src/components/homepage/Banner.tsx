@@ -1,57 +1,54 @@
-"use client";
-
-import bannerImg from "@/assests/banner.png";
 import Image from "next/image";
 import Link from "next/link";
 
-const ACCENT = "#ccff00";
+import banner from "@/assests/banner.png";
+
+import { FiArrowDown } from "react-icons/fi";
 
 export default function Banner() {
-    return (
-        <section className="w-full bg-black px-4 py-6">
-            <div className="mx-auto max-w-7xl rounded-2xl bg-[#161616] border border-white/5 px-10 py-14 md:px-16 md:py-20">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-                    {/* Left: Text content */}
-                    <div className="max-w-2xl">
-                        <p
-                            className="text-xs font-bold tracking-widest uppercase mb-4"
-                            style={{ color: ACCENT }}
-                        >
-                            Workout Library
-                        </p>
+  return (
+    <section className="bg-[#0d0f12] text-white">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-2 lg:px-8 lg:py-20">
 
-                        <h1 className="text-white font-extrabold uppercase leading-[1.05] text-4xl md:text-5xl lg:text-6xl mb-6">
-                            Train with intent.
-                            <br />
-                            Log every set.
-                        </h1>
+        {/* Left */}
+        <div>
+          <p className="mb-4 text-xs font-bold tracking-[0.25em] text-[#ccff00]">
+            WORKOUT LIBRARY
+          </p>
 
-                        <p className="text-gray-400 text-base md:text-lg mb-8 max-w-md">
-                            FitLog is a dark, no-nonsense gym companion: pick a lift, lock
-                            it into today&apos;s plan, and watch the week&apos;s work add
-                            up.
-                        </p>
+          <h1 className="text-4xl font-black uppercase leading-[1.05] sm:text-5xl lg:text-6xl">
+            Train with intent.
+            <br />
+            Log every set.
+          </h1>
 
-                        <Link
-                            href="/workouts"
-                            className="inline-block rounded-md px-6 py-3 font-bold text-sm uppercase tracking-wide text-black transition-transform hover:scale-[1.02]"
-                            style={{ backgroundColor: ACCENT }}
-                        >
-                            Browse Workouts
-                        </Link>
-                    </div>
+          <p className="mt-6 max-w-xl text-sm leading-6 text-gray-400 sm:text-base">
+            FitLog is a dark, no-nonsense gym
+            companion: pick a lift, lock it into
+            today&apos;s plan, and watch the week&apos;s work
+            add up.
+          </p>
 
-                    {/* Right: Illustration */}
-                    <div className="shrink-0 w-72 h-72"> {/* fixed 288x288 box */}
-                        <Image
-                            src={bannerImg}
-                            alt="Muscle anatomy figure on a gym machine"
-                            className="w-full h-auto object-contain"
-                            priority
-                        />
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
+          <Link
+            href="#library"
+            className="mt-7 inline-flex items-center gap-2 rounded-md bg-[#ccff00] px-5 py-3 text-sm font-bold text-black transition hover:opacity-90"
+          >
+            BROWSE WORKOUTS
+            <FiArrowDown />
+          </Link>
+        </div>
+
+        {/* Right */}
+        <div>
+          <Image
+            src={banner}
+            alt="FitLog workout banner"
+            priority
+            className="h-auto w-full rounded-lg object-cover"
+          />
+        </div>
+
+      </div>
+    </section>
+  );
 }
